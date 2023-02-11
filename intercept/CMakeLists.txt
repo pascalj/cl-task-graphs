@@ -93,6 +93,7 @@ add_library(OpenCL SHARED
 # The OpenCL ICD loader is currently always version 1.2 and soversion 1:
 set_target_properties(OpenCL PROPERTIES VERSION "1.2" SOVERSION "1")
 target_link_libraries(OpenCL ${CMAKE_DL_LIBS})
+target_link_libraries(OpenCL spdlog::spdlog)
 
 # This uses modules from: https://github.com/rpavlik/cmake-modules
 # to get Git revision information and put it in the generated files:

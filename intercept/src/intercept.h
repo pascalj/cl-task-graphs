@@ -18,6 +18,10 @@
 #include <sstream>
 #include <unordered_map>
 
+#include "spdlog/spdlog.h"
+#include "spdlog/async.h"
+#include "spdlog/sinks/basic_file_sink.h"
+
 #include <stdint.h>
 
 #include "common.h"
@@ -1354,6 +1358,9 @@ private:
     CUSMKernelInfoMap   m_USMKernelInfoMap;
 
     DISALLOW_COPY_AND_ASSIGN( CLIntercept );
+
+    std::shared_ptr<spdlog::logger> m_enqueueLogger = spdlog::basic_logger_mt<spdlog::async_factory>("enqueue_logger", "logs/enqueue.csv");
+    std::shared_ptr<spdlog::logger> m_timingLogger = spdlog::basic_logger_mt<spdlog::async_factory>("timing_logger", "logs/timing.csv");
 };
 
 ///////////////////////////////////////////////////////////////////////////////

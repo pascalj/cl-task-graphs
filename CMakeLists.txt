@@ -55,6 +55,7 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 git_describe(GIT_DESCRIBE)
 
 find_package(Threads)
+find_package(spdlog REQUIRED)
 
 add_subdirectory(intercept)
 

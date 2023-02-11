@@ -23,6 +23,7 @@ add_executable(cliloader
 add_dependencies(cliloader OpenCL)
 target_include_directories(cliloader PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../intercept)
 target_include_directories(cliloader PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_link_directories(cliloader PRIVATE spdlog::spdlog)
 
 if(WIN32)
     target_link_libraries(cliloader SetupAPI Shlwapi)

@@ -17,6 +17,9 @@
 #include "demangle.h"
 #include "emulate.h"
 #include "intercept.h"
+#include "spdlog/spdlog.h"
+#include "spdlog/async.h"
+#include "spdlog/sinks/basic_file_sink.h"
 
 /*****************************************************************************\
 
@@ -989,9 +992,9 @@ void CLIntercept::callLoggingEnter(
     const uint64_t enqueueCounter,
     const cl_kernel kernel )
 {
-    std::lock_guard<std::mutex> lock(m_Mutex);
 
-    std::string str(">>>> ");
+    std::lock_guard<std::mutex> lock(m_Mutex);
+    std::string str("1,");
     getCallLoggingPrefix( str );
 
     str += functionName;
@@ -1012,9 +1015,7 @@ void CLIntercept::callLoggingEnter(
         str += ss.str();
     }
 
-    str += "\n";
-
-    log( str );
+    m_enqueueLogger->info(str);
 }
 void CLIntercept::callLoggingEnter(
     const char* functionName,
@@ -1028,7 +1029,7 @@ void CLIntercept::callLoggingEnter(
     va_list args;
     va_start( args, formatStr );
 
-    std::string str(">>>> ");
+    std::string str;
     getCallLoggingPrefix( str );
 
     str += functionName;
@@ -1060,9 +1061,7 @@ void CLIntercept::callLoggingEnter(
         str += ss.str();
     }
 
-    str += "\n";
-
-    log( str );
+    m_enqueueLogger->info( str );
 
     va_end( args );
 }
@@ -1106,7 +1105,7 @@ void CLIntercept::callLoggingExit(
 {
     std::lock_guard<std::mutex> lock(m_Mutex);
 
-    std::string str("<<<< ");
+    std::string str("1,");
     getCallLoggingPrefix( str );
 
     str += functionName;
@@ -1119,9 +1118,8 @@ void CLIntercept::callLoggingExit(
 
     str += " -> ";
     str += m_EnumNameMap.name( errorCode );
-    str += "\n";
 
-    log( str );
+    m_enqueueLogger->info( str );
 }
 void CLIntercept::callLoggingExit(
     const char* functionName,
@@ -1160,7 +1158,7 @@ void CLIntercept::callLoggingExit(
     str += " -> ";
     str += m_EnumNameMap.name( errorCode );
 
-    log( "<<<< " + str + "\n" );
+    log( "1," + str);
 
     va_end( args );
 }
@@ -6290,9 +6288,9 @@ void CLIntercept::checkTimingEvents()
                                 << node.Name << " (enqueue " << node.EnqueueCounter << ") = "
                                 << queuedDelta << " ns (queued -> submit), "
                                 << submitDelta << " ns (submit -> start), "
-                                << delta << " ns (start -> end)\n";
+                                << delta << " ns (start -> end)";
 
-                            log( ss.str() );
+                            m_timingLogger->info( ss.str() );
                         }
 
                         if( config().DevicePerformanceTimelineLogging )
