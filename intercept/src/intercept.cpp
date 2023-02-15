@@ -5,6 +5,7 @@
 */
 
 #include <algorithm>
+#include <array>
 #include <errno.h>
 #include <fstream>
 #include <iostream>
@@ -68,7 +69,6 @@ static inline uint64_t Hash(
     return (((uint64_t)hi)<<32)|lo;
 }
 #undef HASH_JENKINS_MIX
-
 const char* CLIntercept::sc_URL = "https://github.com/intel/opencl-intercept-layer";
 const char* CLIntercept::sc_DumpDirectoryName = "CLIntercept_Dump";
 const char* CLIntercept::sc_ReportFileName = "clintercept_report.txt";
@@ -609,6 +609,9 @@ bool CLIntercept::init()
             << "}},\n";
     }
 
+    m_enqueueLogger->set_pattern("%n,%v");
+    m_timingLogger->set_pattern("%n,%v");
+
     log( "... loading complete.\n" );
 
     return true;
@@ -985,6 +988,17 @@ void CLIntercept::getCallLoggingPrefix(
     }
 }
 
+void CLIntercept::getCallLoggingPrefix(
+    LogRow& log_row )
+{
+    if( m_Config.CallLoggingElapsedTime )
+    {
+        using us = std::chrono::microseconds;
+        uint64_t usDelta =
+            std::chrono::duration_cast<us>(clock::now() - m_StartTime).count();
+        log_row.set(LogCol::time, usDelta);
+    }
+}
 ///////////////////////////////////////////////////////////////////////////////
 //
 void CLIntercept::callLoggingEnter(
@@ -994,28 +1008,53 @@ void CLIntercept::callLoggingEnter(
 {
 
     std::lock_guard<std::mutex> lock(m_Mutex);
-    std::string str("1,");
-    getCallLoggingPrefix( str );
+    LogRow log_row;
 
-    str += functionName;
+    // TODO: fix this
+    /* getCallLoggingPrefix( str ); */
+
+    /* str += functionName; */
+    log_row.set(LogCol::function_name, functionName);
 
     if( kernel )
     {
         const std::string& kernelName = getShortKernelNameWithHash(kernel);
-        str += "( ";
-        str += kernelName;
-        str += " )";
+        log_row.set(LogCol::kernel_name, kernelName);
     }
 
     if( m_Config.CallLoggingEnqueueCounter )
     {
-        std::ostringstream  ss;
-        ss << "; EnqueueCounter: ";
-        ss << enqueueCounter;
-        str += ss.str();
+        log_row.set(LogCol::enqueue, std::to_string(enqueueCounter));
     }
 
-    m_enqueueLogger->info(str);
+    m_enqueueLogger->info(log_row.str());
+}
+void CLIntercept::callLoggingEnter(
+    const char* functionName,
+    const uint64_t enqueueCounter,
+    const cl_kernel kernel,
+    LogRow log_row)
+{
+    std::lock_guard<std::mutex> lock(m_Mutex);
+
+    getCallLoggingPrefix( log_row );
+
+    log_row.set(LogCol::function_name, functionName);
+
+    if( kernel )
+    {
+        const std::string& kernelName = getShortKernelNameWithHash(kernel);
+        log_row.set(LogCol::kernel_name, kernelName);
+    }
+
+
+    if( m_Config.CallLoggingEnqueueCounter )
+    {
+        log_row.set(LogCol::enqueue, enqueueCounter);
+    }
+
+    m_enqueueLogger->info(log_row.str());
+
 }
 void CLIntercept::callLoggingEnter(
     const char* functionName,
@@ -1029,39 +1068,33 @@ void CLIntercept::callLoggingEnter(
     va_list args;
     va_start( args, formatStr );
 
-    std::string str;
-    getCallLoggingPrefix( str );
+    LogRow log_row;
+    getCallLoggingPrefix( log_row );
 
-    str += functionName;
+    log_row.set(LogCol::function_name, functionName);
 
     if( kernel )
     {
         const std::string& kernelName = getShortKernelNameWithHash(kernel);
-        str += "( ";
-        str += kernelName;
-        str += " )";
+        log_row.set(LogCol::kernel_name, kernelName);
     }
 
     int size = CLI_VSPRINTF( m_StringBuffer, CLI_STRING_BUFFER_SIZE, formatStr, args );
     if( size >= 0 && size < CLI_STRING_BUFFER_SIZE )
     {
-        str += ": ";
+        std::string str;
+        str += "unknown m_StringBuffer: ";
         str += m_StringBuffer;
-    }
-    else
-    {
-        str += ": too long";
+        str += "\n";
+        log(str);
     }
 
     if( m_Config.CallLoggingEnqueueCounter )
     {
-        std::ostringstream  ss;
-        ss << "; EnqueueCounter: ";
-        ss << enqueueCounter;
-        str += ss.str();
+        log_row.set(LogCol::enqueue, enqueueCounter);
     }
 
-    m_enqueueLogger->info( str );
+    m_enqueueLogger->info(log_row.str());
 
     va_end( args );
 }

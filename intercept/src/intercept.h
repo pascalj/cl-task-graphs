@@ -47,6 +47,55 @@
 #endif
 
 #include "OS/OS.h"
+enum class LogCol {
+    exit = 0,
+    function_name,
+    platform,
+    device_type,
+    param_name,
+    device,
+    context,
+    program,
+    kernel_name,
+    flags,
+    size,
+    host_ptr,
+    kernel,
+    index,
+    value,
+    enqueue,
+    queue,
+    global_work_size,
+    local_work_size,
+    buffer,
+    offset,
+    cb,
+    time
+};
+
+class LogRow {
+public:
+    std::array<std::string, 23> fields;
+
+    void set(LogCol col, const std::string& val) {
+        auto col_num = static_cast<int>(col);
+        assert(col_num < fields.size());
+        fields[col_num] = val;
+    }
+
+    void set(LogCol col, int val) {
+        set(col, std::to_string(val));
+    }
+
+    std::string str() const {
+        std::ostringstream os;
+        for (size_t i = 0; i < fields.size(); i++) {
+            os << fields[i] << ",";
+        }
+        return os.str();
+    }
+};
+
 
 class CLIntercept
 {
@@ -68,6 +117,11 @@ public:
                 const char* functionName,
                 const uint64_t enqueueCounter,
                 const cl_kernel kernel );
+    void    callLoggingEnter(
+                const char* functionName,
+                const uint64_t enqueueCounter,
+                const cl_kernel kernel,
+                LogRow row);
     void    callLoggingEnter(
                 const char* functionName,
                 const uint64_t enqueueCounter,
@@ -968,6 +1022,8 @@ private:
 
     void    getCallLoggingPrefix(
                 std::string& str );
+    void    getCallLoggingPrefix(
+                LogRow&);
 
     void    writeReport(
                 std::ostream& os );
@@ -1918,6 +1974,14 @@ inline CObjectTracker& CLIntercept::objectTracker()
     {                                                                       \
         pIntercept->callLoggingEnter(                                       \
             __FUNCTION__, enqueueCounter, NULL, ##__VA_ARGS__ );            \
+    }                                                                       \
+    ITT_CALL_LOGGING_ENTER( NULL );
+
+#define CALL_LOGGING_ENTER_ROW(row)                                         \
+    if( pIntercept->config().CallLogging )                                  \
+    {                                                                       \
+        pIntercept->callLoggingEnter(                                       \
+            __FUNCTION__, enqueueCounter, NULL, row);                       \
     }                                                                       \
     ITT_CALL_LOGGING_ENTER( NULL );
 

@@ -81,10 +81,14 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clGetPlatformInfo)(
                 platform,
                 platformInfo );
         }
+        LogRow log_row;
         CALL_LOGGING_ENTER( "platform = %s, param_name = %s (%08X)",
             platformInfo.c_str(),
             pIntercept->enumName().name( param_name ).c_str(),
             param_name );
+        log_row.set(LogCol::platform, platformInfo.c_str());
+        log_row.set(LogCol::param_name, pIntercept->enumName().name( param_name ).c_str());
+        CALL_LOGGING_ENTER_ROW(log_row);
         HOST_PERFORMANCE_TIMING_START();
 
         cl_int  retVal = CL_SUCCESS;
