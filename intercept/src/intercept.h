@@ -69,14 +69,25 @@ enum class LogCol {
     global_work_size,
     local_work_size,
     buffer,
+    src_buffer,
     offset,
     cb,
-    time
+    time,
+    return_value,
+    arg_index,
+    arg_size,
+    arg_value,
+    num_devices,
+    binaries,
+    ptr,
+    memobj,
+    event,
+    LOGCOL_LAST
 };
 
 class LogRow {
 public:
-    std::array<std::string, 23> fields;
+    std::array<std::string, static_cast<int>(LogCol::LOGCOL_LAST)> fields;
 
     void set(LogCol col, const std::string& val) {
         auto col_num = static_cast<int>(col);
@@ -136,10 +147,8 @@ public:
                 const char* functionName,
                 const uint64_t enqueueCounter,
                 const cl_kernel kernel );
-    void    callLoggingEnter(
-                const char* functionName,
+    void    callLoggingEnterRow(
                 const uint64_t enqueueCounter,
-                const cl_kernel kernel,
                 LogRow row);
     void    callLoggingEnter(
                 const char* functionName,
@@ -2002,8 +2011,7 @@ inline CObjectTracker& CLIntercept::objectTracker()
 #define CALL_LOGGING_ENTER_ROW(row)                                         \
     if( pIntercept->config().CallLogging )                                  \
     {                                                                       \
-        pIntercept->callLoggingEnter(                                       \
-            __FUNCTION__, enqueueCounter, NULL, row);                       \
+        pIntercept->callLoggingEnterRow(enqueueCounter, row);                                  \
     }                                                                       \
     ITT_CALL_LOGGING_ENTER( NULL );
 

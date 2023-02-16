@@ -1010,10 +1010,6 @@ void CLIntercept::callLoggingEnter(
     std::lock_guard<std::mutex> lock(m_Mutex);
     LogRow log_row;
 
-    // TODO: fix this
-    /* getCallLoggingPrefix( str ); */
-
-    /* str += functionName; */
     log_row.set(LogCol::function_name, functionName);
 
     if( kernel )
@@ -1027,35 +1023,22 @@ void CLIntercept::callLoggingEnter(
         log_row.set(LogCol::enqueue, std::to_string(enqueueCounter));
     }
 
-    m_enqueueLogger->info(log_row.str());
+    log(log_row.str());
 }
-void CLIntercept::callLoggingEnter(
-    const char* functionName,
+
+void CLIntercept::callLoggingEnterRow(
     const uint64_t enqueueCounter,
-    const cl_kernel kernel,
     LogRow log_row)
 {
-    std::lock_guard<std::mutex> lock(m_Mutex);
-
-    getCallLoggingPrefix( log_row );
-
-    log_row.set(LogCol::function_name, functionName);
-
-    if( kernel )
-    {
-        const std::string& kernelName = getShortKernelNameWithHash(kernel);
-        log_row.set(LogCol::kernel_name, kernelName);
-    }
-
-
+    log_row.set(LogCol::exit, 0);
     if( m_Config.CallLoggingEnqueueCounter )
     {
-        log_row.set(LogCol::enqueue, enqueueCounter);
+        log_row.set(LogCol::enqueue, std::to_string(enqueueCounter));
     }
 
     m_enqueueLogger->info(log_row.str());
-
 }
+
 void CLIntercept::callLoggingEnter(
     const char* functionName,
     const uint64_t enqueueCounter,
@@ -1094,9 +1077,7 @@ void CLIntercept::callLoggingEnter(
         log_row.set(LogCol::enqueue, enqueueCounter);
     }
 
-    m_enqueueLogger->info(log_row.str());
-
-    va_end( args );
+    log(log_row.str());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1152,7 +1133,6 @@ void CLIntercept::callLoggingExit(
     str += " -> ";
     str += m_EnumNameMap.name( errorCode );
 
-    m_enqueueLogger->info( str );
 }
 void CLIntercept::callLoggingExit(
     const char* functionName,
