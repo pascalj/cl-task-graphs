@@ -5,6 +5,7 @@
 */
 #pragma once
 
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <cinttypes>
@@ -87,6 +88,24 @@ public:
         set(col, std::to_string(val));
     }
 
+    void set(LogCol col, void* ptr) {
+            std::stringstream ss;
+            ss << ptr;
+            set(col, ss.str());
+    }
+
+    void set(LogCol col, cl_uint work_dim, const size_t *work_size) {
+      size_t sum = 1;
+      if (work_size) {
+        for (size_t i = 0; i < work_dim; i++) {
+          sum *= work_size[i];
+        }
+      } else {
+        sum = 0;
+      }
+      set(col, sum);
+    }
+
     std::string str() const {
         std::ostringstream os;
         for (size_t i = 0; i < fields.size(); i++) {
@@ -139,6 +158,7 @@ public:
                 const char* functionName,
                 const cl_int errorCode,
                 const cl_event* event );
+    void    callLoggingExit(LogRow row);
     void    callLoggingExit(
                 const char* functionName,
                 const cl_int errorCode,
@@ -1015,10 +1035,12 @@ private:
 
     void    addShortKernelName(
                 const std::string& kernelName );
+public:
     std::string getShortKernelName(
                     const cl_kernel kernel );
     std::string getShortKernelNameWithHash(
                     const cl_kernel kernel );
+private:
 
     void    getCallLoggingPrefix(
                 std::string& str );
@@ -2007,6 +2029,23 @@ inline CObjectTracker& CLIntercept::objectTracker()
             errorCode,                                                      \
             NULL,                                                           \
             ##__VA_ARGS__ );                                                \
+    }                                                                       \
+    if( pIntercept->config().ChromeCallLogging )                            \
+    {                                                                       \
+        pIntercept->chromeCallLoggingExit(                                  \
+            __FUNCTION__,                                                   \
+            "",                                                             \
+            false,                                                          \
+            0,                                                              \
+            cpuStart,                                                       \
+            cpuEnd );                                                       \
+    }                                                                       \
+    ITT_CALL_LOGGING_EXIT();
+
+#define CALL_LOGGING_EXIT_ROW(row)                                          \
+    if( pIntercept->config().CallLogging )                                  \
+    {                                                                       \
+        pIntercept->callLoggingExit(row);                                   \
     }                                                                       \
     if( pIntercept->config().ChromeCallLogging )                            \
     {                                                                       \

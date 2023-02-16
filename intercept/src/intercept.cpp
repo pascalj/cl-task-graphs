@@ -1196,6 +1196,13 @@ void CLIntercept::callLoggingExit(
     va_end( args );
 }
 
+void CLIntercept::callLoggingExit(LogRow row)
+{
+    getCallLoggingPrefix( row );
+
+    row.set(LogCol::exit, 1);
+    m_enqueueLogger->info(row.str());
+}
 ///////////////////////////////////////////////////////////////////////////////
 //
 void CLIntercept::cacheDeviceInfo(

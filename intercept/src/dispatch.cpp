@@ -82,10 +82,6 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clGetPlatformInfo)(
                 platformInfo );
         }
         LogRow log_row;
-        CALL_LOGGING_ENTER( "platform = %s, param_name = %s (%08X)",
-            platformInfo.c_str(),
-            pIntercept->enumName().name( param_name ).c_str(),
-            param_name );
         log_row.set(LogCol::platform, platformInfo.c_str());
         log_row.set(LogCol::param_name, pIntercept->enumName().name( param_name ).c_str());
         CALL_LOGGING_ENTER_ROW(log_row);
@@ -4809,12 +4805,18 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueNDRangeKernel)(
                     num_events_in_wait_list,
                     event_wait_list);
             }
-            CALL_LOGGING_ENTER_KERNEL(
-                kernel,
-                "queue = %p, kernel = %p, %s",
-                command_queue,
-                kernel,
-                argsString.c_str() );
+            LogRow log_row;
+            log_row.set(LogCol::exit, false);
+            log_row.set(LogCol::kernel, kernel);
+            log_row.set(LogCol::function_name, __FUNCTION__);
+            log_row.set(LogCol::kernel_name, pIntercept->getShortKernelName(kernel));
+            log_row.set(LogCol::queue, command_queue); 
+            log_row.set(LogCol::global_work_size, work_dim, global_work_size); 
+            log_row.set(LogCol::local_work_size, work_dim, local_work_size); 
+
+            // TODO: log events!
+
+            CALL_LOGGING_ENTER_ROW(log_row);
 
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_KERNEL(
@@ -4878,7 +4880,8 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueNDRangeKernel)(
             DEVICE_PERFORMANCE_TIMING_END_WITH_TAG( command_queue, event );
             CHECK_ERROR( retVal );
             ADD_OBJECT_ALLOCATION( event ? event[0] : NULL );
-            CALL_LOGGING_EXIT_EVENT_WITH_TAG( retVal, event );
+            /* CALL_LOGGING_EXIT_EVENT_WITH_TAG( retVal, event ); */
+            CALL_LOGGING_EXIT_ROW(log_row);
             ADD_EVENT( event ? event[0] : NULL );
         }
 
@@ -4918,12 +4921,16 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueTask)(
                 num_events_in_wait_list,
                 event_wait_list);
 
-            CALL_LOGGING_ENTER_KERNEL(
-                kernel,
-                "queue = %p, kernel = %p%s",
-                command_queue,
-                kernel,
-                eventWaitListString.c_str());
+            LogRow log_row;
+            log_row.set(LogCol::exit, false);
+            log_row.set(LogCol::kernel, kernel);
+            log_row.set(LogCol::function_name, __FUNCTION__);
+            log_row.set(LogCol::kernel_name, pIntercept->getShortKernelName(kernel));
+            log_row.set(LogCol::queue, command_queue); 
+            log_row.set(LogCol::global_work_size, 1); 
+            log_row.set(LogCol::local_work_size, 1); 
+            CALL_LOGGING_ENTER_ROW(log_row);
+            
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_KERNEL( command_queue, kernel, 0, NULL, NULL, NULL );
             DEVICE_PERFORMANCE_TIMING_START( event );
@@ -5129,16 +5136,18 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueBarrier)(
 
         if( pIntercept->config().NullEnqueue == false )
         {
-            CALL_LOGGING_ENTER( "queue = %p",
-                command_queue );
+            LogRow log_row;
+            log_row.set(LogCol::function_name, __FUNCTION__);
+            log_row.set(LogCol::queue, command_queue);
+            CALL_LOGGING_ENTER_ROW(log_row);
             HOST_PERFORMANCE_TIMING_START();
 
             retVal = pIntercept->dispatch().clEnqueueBarrier(
                 command_queue );
 
             HOST_PERFORMANCE_TIMING_END();
-            CHECK_ERROR( retVal );
-            CALL_LOGGING_EXIT( retVal );
+            CHECK_ERROR(retVal);
+            CALL_LOGGING_EXIT_ROW(log_row);
         }
 
         FINISH_OR_FLUSH_AFTER_ENQUEUE( command_queue );
