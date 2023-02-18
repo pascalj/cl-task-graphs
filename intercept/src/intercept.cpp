@@ -609,9 +609,16 @@ bool CLIntercept::init()
             << "}},\n";
     }
 
-    m_enqueueLogger->set_pattern("%n,%v");
-    m_eventLogger->set_pattern("%n,%v");
-    m_timingLogger->set_pattern("%n,%v");
+    m_enqueueLogger->set_pattern("%v");
+    m_eventLogger->set_pattern("%v");
+    m_timingLogger->set_pattern("%v");
+    auto enqueue_header = "exit, function_name, platform, device_type, param_name, device, context, program,\
+kernel_name, flags, size, host_ptr, kernel, index, value, enqueue, queue, global_work_size,\
+local_work_size, buffer, src_buffer, offset, cb, time, return_value, arg_index, arg_size, arg_value,\
+num_devices, binaries, ptr, memobj, event";
+    m_enqueueLogger->info(enqueue_header);
+    m_eventLogger->info("logger,direction,function_name,count,in_event,event,event_type");
+    m_timingLogger->info("name,enqueue,queued,submit,start,end");
 
     log( "... loading complete.\n" );
 
@@ -6304,6 +6311,7 @@ void CLIntercept::checkTimingEvents()
 
                             std::ostringstream  ss;
 
+                            
                             ss << "Device Time for "
                                 //<< "call " << numberOfCalls << " to "
                                 << node.Name << " (enqueue " << node.EnqueueCounter << ") = "
@@ -6311,22 +6319,21 @@ void CLIntercept::checkTimingEvents()
                                 << submitDelta << " ns (submit -> start), "
                                 << delta << " ns (start -> end)";
 
-                            m_timingLogger->info( ss.str() );
+                            /* m_timingLogger->info( ss.str() ); */
                         }
 
                         if( config().DevicePerformanceTimelineLogging )
                         {
                             std::ostringstream  ss;
 
-                            ss << "Device Timeline for "
-                                //<< "call " << numberOfCalls << " to "
-                                << node.Name << " (enqueue " << node.EnqueueCounter << ") = "
-                                << commandQueued << " ns (queued), "
-                                << commandSubmit << " ns (submit), "
-                                << commandStart << " ns (start), "
-                                << commandEnd << " ns (end)\n";
+                            ss << node.Name << ","
+                                << node.EnqueueCounter << ","
+                                << commandQueued << ","
+                                << commandSubmit << ","
+                                << commandStart << ","
+                                << commandEnd;
 
-                            log( ss.str() );
+                            m_timingLogger->info(ss.str());
                         }
 
 #if defined(USE_ITT)
