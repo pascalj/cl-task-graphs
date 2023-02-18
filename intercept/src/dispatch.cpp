@@ -2944,6 +2944,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clWaitForEvents)(
         CALL_LOGGING_ENTER( "event_list = %s",
             eventList.c_str() );
         CHECK_EVENT_LIST( num_events, event_list, NULL );
+LOG_EVENT_LIST( num_events, event_list, NULL );
         HOST_PERFORMANCE_TIMING_START();
 
         cl_int  retVal = pIntercept->dispatch().clWaitForEvents(
@@ -3258,6 +3259,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clFinish)(
             command_queue );
 
         log_row.set(LogCol::return_value, retVal);
+        pIntercept->logFinish(command_queue);
         HOST_PERFORMANCE_TIMING_END();
         CHECK_ERROR( retVal );
         CALL_LOGGING_EXIT_ROW(log_row);
@@ -3309,6 +3311,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueReadBuffer)(
 
             CALL_LOGGING_ENTER_ROW(log_row);
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_BLOCKING( blocking_read, cb );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -3424,6 +3427,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueReadBufferRect)(
                     eventWaitListString.c_str() );
             }
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_BLOCKING( blocking_read, region ? region[0] * region[1] * region[2] : 0 );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -3507,6 +3511,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueWriteBuffer)(
 
             CALL_LOGGING_ENTER_ROW(log_row);
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_BLOCKING( blocking_write, cb );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -3622,6 +3627,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueWriteBufferRect)(
                     eventWaitListString.c_str() );
             }
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_BLOCKING( blocking_write, region ? region[0] * region[1] * region[2] : 0 );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -3704,6 +3710,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueFillBuffer)(
                 size,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_BLOCKING( CL_FALSE, size );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -3781,6 +3788,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueCopyBuffer)(
                 cb,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_BLOCKING( CL_FALSE, cb );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -3886,6 +3894,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueCopyBufferRect)(
                     eventWaitListString.c_str() );
             }
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_BLOCKING( CL_FALSE, region ? region[0] * region[1] * region[2] : 0 );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -3977,6 +3986,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueReadImage)(
                     eventWaitListString.c_str() );
             }
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_BLOCKING( blocking_read, 0 );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -4075,6 +4085,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueWriteImage)(
                 ptr,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_BLOCKING( blocking_write, 0 );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -4168,6 +4179,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueFillImage)(
                 image,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
 
@@ -4233,6 +4245,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueCopyImage)(
                 dst_image,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
 
@@ -4315,6 +4328,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueCopyImageToBuffer)(
                 dst_buffer,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
 
@@ -4387,6 +4401,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueCopyBufferToImage)(
                 dst_image,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
 
@@ -4470,6 +4485,7 @@ CL_API_ENTRY void* CL_API_CALL CLIRN(clEnqueueMapBuffer)(
             CALL_LOGGING_ENTER_ROW(log_row);
 
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             CHECK_ERROR_INIT( errcode_ret );
             GET_TIMING_TAGS_MAP( blocking_map, map_flags, cb );
             DEVICE_PERFORMANCE_TIMING_START( event );
@@ -4595,6 +4611,7 @@ CL_API_ENTRY void* CL_API_CALL CLIRN(clEnqueueMapImage)(
                     eventWaitListString.c_str() );
             }
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             CHECK_ERROR_INIT( errcode_ret );
             GET_TIMING_TAGS_MAP( blocking_map, map_flags, 0 );
             DEVICE_PERFORMANCE_TIMING_START( event );
@@ -4696,6 +4713,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueUnmapMemObject)(
             log_row.set(LogCol::memobj, memobj);
             CALL_LOGGING_ENTER_ROW(log_row);
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_UNMAP( mapped_ptr );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -4773,6 +4791,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueMigrateMemObjects)(
                 flags,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
 
@@ -4869,6 +4888,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueNDRangeKernel)(
             CALL_LOGGING_ENTER_ROW(log_row);
 
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_KERNEL(
                 command_queue,
                 kernel,
@@ -4981,6 +5001,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueTask)(
             CALL_LOGGING_ENTER_ROW(log_row);
             
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_KERNEL( command_queue, kernel, 0, NULL, NULL, NULL );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -5039,6 +5060,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueNativeKernel)(
             CALL_LOGGING_ENTER( "queue = %p",
                 command_queue );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
 
@@ -5148,6 +5170,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueWaitForEvents)(
                 command_queue,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events, event_list, NULL );
+LOG_EVENT_LIST( num_events, event_list, NULL );
             HOST_PERFORMANCE_TIMING_START();
 
             retVal = pIntercept->dispatch().clEnqueueWaitForEvents(
@@ -5240,6 +5263,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueMarkerWithWaitList)(
                 command_queue,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             HOST_PERFORMANCE_TIMING_START();
 
             retVal = pIntercept->dispatch().clEnqueueMarkerWithWaitList(
@@ -5293,6 +5317,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueBarrierWithWaitList)(
                 command_queue,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             HOST_PERFORMANCE_TIMING_START();
 
             retVal = pIntercept->dispatch().clEnqueueBarrierWithWaitList(
@@ -5513,6 +5538,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueWaitSemaphoresKHR(
                     queue,
                     semaphoreString.c_str() );
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -5584,6 +5610,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueSignalSemaphoresKHR(
                     queue,
                     semaphoreString.c_str() );
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -6193,6 +6220,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueAcquireGLObjects)(
                 num_objects,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
 
@@ -6260,6 +6288,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueReleaseGLObjects)(
                 num_objects,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
 
@@ -6400,6 +6429,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueSVMFree) (
                 num_svm_pointers,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
 
@@ -6467,6 +6497,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueSVMMemcpy) (
                 size,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_BLOCKING( blocking_copy, size );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -6539,6 +6570,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueSVMMemFill) (
                 size,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_BLOCKING( CL_FALSE, size );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -6608,6 +6640,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueSVMMap) (
                 size,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             GET_TIMING_TAGS_MAP( blocking_map, map_flags, size );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
@@ -6676,6 +6709,7 @@ CL_API_ENTRY cl_int CL_API_CALL CLIRN(clEnqueueSVMUnmap) (
                 svm_ptr,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
 
@@ -7479,6 +7513,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueSVMMigrateMem(
                 flags,
                 eventWaitListString.c_str() );
             CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
             DEVICE_PERFORMANCE_TIMING_START( event );
             HOST_PERFORMANCE_TIMING_START();
 
@@ -7535,6 +7570,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueAcquireExternalMemObjectsKHR(
             {
                 CALL_LOGGING_ENTER();
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -7591,6 +7627,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueReleaseExternalMemObjectsKHR(
             {
                 CALL_LOGGING_ENTER();
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -7922,6 +7959,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueAcquireD3D10ObjectsKHR(
             {
                 CALL_LOGGING_ENTER();
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -7978,6 +8016,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueReleaseD3D10ObjectsKHR(
             {
                 CALL_LOGGING_ENTER();
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -8227,6 +8266,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueAcquireD3D11ObjectsKHR(
             {
                 CALL_LOGGING_ENTER();
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -8283,6 +8323,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueReleaseD3D11ObjectsKHR(
             {
                 CALL_LOGGING_ENTER();
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -8444,6 +8485,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueAcquireDX9MediaSurfacesKHR(
             {
                 CALL_LOGGING_ENTER();
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -8500,6 +8542,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueReleaseDX9MediaSurfacesKHR(
             {
                 CALL_LOGGING_ENTER();
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -8661,6 +8704,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueAcquireDX9ObjectsINTEL(
             {
                 CALL_LOGGING_ENTER();
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -8717,6 +8761,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueReleaseDX9ObjectsINTEL(
             {
                 CALL_LOGGING_ENTER();
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -9351,6 +9396,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueAcquireVA_APIMediaSurfacesINTEL(
             {
                 CALL_LOGGING_ENTER();
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -9407,6 +9453,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueReleaseVA_APIMediaSurfacesINTEL(
             {
                 CALL_LOGGING_ENTER();
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -10087,6 +10134,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueMemsetINTEL(   // Deprecated
                     size,
                     eventWaitListString.c_str() );
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 GET_TIMING_TAGS_MEMFILL( queue, dst_ptr, size );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
@@ -10157,6 +10205,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueMemFillINTEL(
                     size,
                     eventWaitListString.c_str() );
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 GET_TIMING_TAGS_MEMFILL( queue, dst_ptr, size );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
@@ -10229,6 +10278,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueMemcpyINTEL(
                     size,
                     eventWaitListString.c_str() );
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 GET_TIMING_TAGS_MEMCPY( queue, blocking, dst_ptr, src_ptr, size );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
@@ -10305,6 +10355,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueMigrateMemINTEL(
                     flags,
                     eventWaitListString.c_str() );
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -10374,6 +10425,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueMemAdviseINTEL(
                     advice,
                     eventWaitListString.c_str() );
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 
@@ -10610,6 +10662,7 @@ CL_API_ENTRY cl_int CL_API_CALL clEnqueueCommandBufferKHR(
                     command_buffer,
                     eventWaitListString.c_str() );
                 CHECK_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
+LOG_EVENT_LIST( num_events_in_wait_list, event_wait_list, event );
                 DEVICE_PERFORMANCE_TIMING_START( event );
                 HOST_PERFORMANCE_TIMING_START();
 

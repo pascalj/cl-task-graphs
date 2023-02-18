@@ -669,6 +669,12 @@ public:
                 cl_uint numEvents,
                 const cl_event* eventList,
                 cl_event* event );
+    void    logEventList(
+                const char* functionName,
+                cl_uint numEvents,
+                const cl_event* eventList,
+                cl_event* event );
+    void logFinish(cl_command_queue event);
     void    checkKernelArgUSMPointer(
                 cl_kernel kernel,
                 const void* arg );
@@ -1446,8 +1452,15 @@ private:
 
     DISALLOW_COPY_AND_ASSIGN( CLIntercept );
 
-    std::shared_ptr<spdlog::logger> m_enqueueLogger = spdlog::basic_logger_mt<spdlog::async_factory>("enqueue_logger", "logs/enqueue.csv");
-    std::shared_ptr<spdlog::logger> m_timingLogger = spdlog::basic_logger_mt<spdlog::async_factory>("timing_logger", "logs/timing.csv");
+    std::shared_ptr<spdlog::logger> m_enqueueLogger =
+        spdlog::basic_logger_mt<spdlog::async_factory>("enqueue",
+                                                       "logs/enqueue.csv");
+    std::shared_ptr<spdlog::logger> m_eventLogger =
+        spdlog::basic_logger_mt<spdlog::async_factory>("event",
+                                                       "logs/events.csv");
+    std::shared_ptr<spdlog::logger> m_timingLogger =
+        spdlog::basic_logger_mt<spdlog::async_factory>("timing",
+                                                       "logs/timing.csv");
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -3262,6 +3275,18 @@ inline bool CLIntercept::checkDevicePerformanceTimingEnqueueLimits(
     if( pIntercept->config().EventChecking )                                \
     {                                                                       \
         pIntercept->checkEventList(                                         \
+            __FUNCTION__,                                                   \
+            _numEvents,                                                     \
+            _eventList,                                                     \
+            _event );                                                       \
+    }
+
+///////////////////////////////////////////////////////////////////////////////
+//
+#define LOG_EVENT_LIST( _numEvents, _eventList, _event )                    \
+    if(true)                                                                \
+    {                                                                       \
+        pIntercept->logEventList(                                           \
             __FUNCTION__,                                                   \
             _numEvents,                                                     \
             _eventList,                                                     \

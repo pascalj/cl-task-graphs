@@ -610,6 +610,7 @@ bool CLIntercept::init()
     }
 
     m_enqueueLogger->set_pattern("%n,%v");
+    m_eventLogger->set_pattern("%n,%v");
     m_timingLogger->set_pattern("%n,%v");
 
     log( "... loading complete.\n" );
@@ -7938,6 +7939,42 @@ void CLIntercept::checkEventList(
             }
         }
     }
+}
+
+void CLIntercept::logEventList(
+    const char* functionName,
+    cl_uint numEvents,
+    const cl_event* eventList,
+    cl_event* event )
+{
+    std::ostringstream ss;
+        for(cl_uint i = 0; i < numEvents; i++) {
+            ss << "out" << ",";
+            ss << functionName << ",";
+            ss << numEvents << ",";
+            ss << eventList[i] << ",";
+            ss << *event << ",";
+            cl_command_type type;
+            dispatch().clGetEventInfo(eventList[i], CL_EVENT_COMMAND_TYPE, sizeof(cl_command_type), &type, NULL);
+            ss << type;
+    }
+    if(event) {
+        ss << "in" << ",";
+        ss << functionName << ",";
+        ss << "1,";
+        ss << ",";
+        ss << *event << ",";
+        cl_command_type type;
+        dispatch().clGetEventInfo(*event, CL_EVENT_COMMAND_TYPE, sizeof(cl_command_type), &type, NULL);
+            ss << type;
+    }
+    m_eventLogger->info(ss.str());
+}
+
+void CLIntercept::logFinish(cl_command_queue command_queue) {
+    std::ostringstream ss;
+    ss << "in,clFinish,1,," << command_queue << ",";
+    m_eventLogger->info(ss.str());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
